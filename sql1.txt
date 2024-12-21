@@ -1,0 +1,220 @@
+Enter password: ****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 3
+Server version: 5.5.16 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use retail
+Database changed
+mysql>
+mysql> show tables;
++------------------+
+| Tables_in_retail |
++------------------+
+| customer         |
+| orders           |
+| salespeople      |
++------------------+
+3 rows in set (0.00 sec)
+
+mysql> select * from  customer;
++------+----------+----------+--------+------+
+| cnum | cname    | city     | rating | snum |
++------+----------+----------+--------+------+
+| 2001 | hoffman  | London   |    100 | 1001 |
+| 2002 | Giovanni | Rome     |    200 | 1003 |
+| 2003 | Liu      | San Jose |    200 | 1002 |
+| 2004 | Grass    | Berlin   |    300 | 1002 |
+| 2006 | Clemens  | London   |    100 | 1001 |
+| 2007 | Pereira  | Rome     |    100 | 1004 |
+| 2008 | Cisneros | San Jose |    300 | 1007 |
++------+----------+----------+--------+------+
+7 rows in set (0.00 sec)
+
+mysql> select * from  orders;
++------+---------+------------+------+
+| onum | amt     | odate      | cnum |
++------+---------+------------+------+
+| 3001 |   18.69 | 1996-03-10 | 2008 |
+| 3002 | 1900.10 | 1996-10-03 | 2007 |
+| 3003 |  767.19 | 1996-10-03 | 2001 |
+| 3005 | 5160.45 | 1996-10-03 | 2003 |
+| 3006 | 1098.16 | 1996-10-03 | 2008 |
+| 3007 |   75.75 | 1996-10-04 | 2002 |
+| 3008 | 4723.00 | 1996-10-05 | 2006 |
+| 3009 | 1713.23 | 1996-10-04 | 2002 |
+| 3010 | 1309.95 | 1996-10-06 | 2004 |
+| 3011 | 9891.88 | 1996-10-06 | 2006 |
++------+---------+------------+------+
+10 rows in set (0.00 sec)
+
+mysql> select * from  Salespeople;
++------+---------+-----------+------+
+| snum | sname   | city      | comm |
++------+---------+-----------+------+
+| 1001 | Peel    | London    | 0.12 |
+| 1002 | Serres  | San Jose  | 0.13 |
+| 1003 | AxelRod | New York  | 0.10 |
+| 1004 | Motika  | London    | 0.11 |
+| 1005 | Fran    | London    | 0.26 |
+| 1007 | Rifkin  | Barcelona | 0.15 |
++------+---------+-----------+------+
+6 rows in set (0.00 sec)
+
+mysql> SELECT s.sname, SUM(o.amt) AS total_sales
+    -> FROM Salespeople s
+    -> JOIN customer c ON s.snum = c.snum
+    -> JOIN orders o ON c.cnum = o.cnum
+    -> GROUP BY s.snum
+    -> ORDER BY total_sales DESC
+    -> LIMIT 1;
++-------+-------------+
+| sname | total_sales |
++-------+-------------+
+| Peel  |    15382.07 |
++-------+-------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT s.sname, COUNT(c.cnum) AS customer_count
+    -> FROM Salespeople s
+    -> JOIN customer c ON s.snum = c.snum
+    -> GROUP BY s.snum;
++---------+----------------+
+| sname   | customer_count |
++---------+----------------+
+| Peel    |              2 |
+| Serres  |              2 |
+| AxelRod |              1 |
+| Motika  |              1 |
+| Rifkin  |              1 |
++---------+----------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT c.cname, COUNT(o.onum) AS order_count
+    -> FROM customer c
+    -> JOIN orders o ON c.cnum = o.cnum
+    -> GROUP BY c.cnum
+    -> ORDER BY order_count DESC
+    -> LIMIT 1;
++---------+-------------+
+| cname   | order_count |
++---------+-------------+
+| Clemens |           2 |
++---------+-------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT s.sname, AVG(o.amt) AS avg_order_size
+    -> FROM Salespeople s
+    -> JOIN customer c ON s.snum = c.snum
+    -> JOIN orders o ON c.cnum = o.cnum
+    -> GROUP BY s.snum;
++---------+----------------+
+| sname   | avg_order_size |
++---------+----------------+
+| Peel    |    5127.356667 |
+| Serres  |    3235.200000 |
+| AxelRod |     894.490000 |
+| Motika  |    1900.100000 |
+| Rifkin  |     558.425000 |
++---------+----------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT c.cname, SUM(o.amt) AS total_spent
+    -> FROM customer c
+    -> JOIN orders o ON c.cnum = o.cnum
+    -> GROUP BY c.cnum
+    -> ORDER BY total_spent DESC
+    -> LIMIT 1;
++---------+-------------+
+| cname   | total_spent |
++---------+-------------+
+| Clemens |    14614.88 |
++---------+-------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT c.city, SUM(o.amt) AS total_sales
+    -> FROM customer c
+    -> JOIN orders o ON c.cnum = o.cnum
+    -> GROUP BY c.city
+    -> ORDER BY total_sales DESC
+    -> LIMIT 1;
++--------+-------------+
+| city   | total_sales |
++--------+-------------+
+| London |    15382.07 |
++--------+-------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT s.sname, AVG(c.rating) AS avg_customer_rating
+    -> FROM Salespeople s
+    -> JOIN customer c ON s.snum = c.snum
+    -> GROUP BY s.snum
+    -> ORDER BY avg_customer_rating DESC
+    -> LIMIT 1;
++--------+---------------------+
+| sname  | avg_customer_rating |
++--------+---------------------+
+| Rifkin |            300.0000 |
++--------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT s.sname,
+    ->        (COUNT(DISTINCT o.cnum) / COUNT(DISTINCT c.cnum)) * 100 AS order_percentage
+    -> FROM Salespeople s
+    -> JOIN customer c ON s.snum = c.snum
+    -> LEFT JOIN orders o ON c.cnum = o.cnum
+    -> GROUP BY s.snum;
++---------+------------------+
+| sname   | order_percentage |
++---------+------------------+
+| Peel    |         100.0000 |
+| Serres  |         100.0000 |
+| AxelRod |         100.0000 |
+| Motika  |         100.0000 |
+| Rifkin  |         100.0000 |
++---------+------------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT c.cname, SUM(o.amt) AS total_revenue
+    -> FROM customer c
+    -> JOIN orders o ON c.cnum = o.cnum
+    -> GROUP BY c.cnum;
++----------+---------------+
+| cname    | total_revenue |
++----------+---------------+
+| hoffman  |        767.19 |
+| Giovanni |       1788.98 |
+| Liu      |       5160.45 |
+| Grass    |       1309.95 |
+| Clemens  |      14614.88 |
+| Pereira  |       1900.10 |
+| Cisneros |       1116.85 |
++----------+---------------+
+7 rows in set (0.00 sec)
+
+
+mysql> SELECT s.sname,
+    ->        (SUM(o.amt) / (SELECT SUM(amt) FROM orders)) * 100 AS revenue_percentage
+    -> FROM Salespeople s
+    -> JOIN customer c ON s.snum = c.snum
+    -> JOIN orders o ON c.cnum = o.cnum
+    -> GROUP BY s.snum;
++---------+--------------------+
+| sname   | revenue_percentage |
++---------+--------------------+
+| Peel    |          57.700650 |
+| Serres  |          24.271524 |
+| AxelRod |           6.710755 |
+| Motika  |           7.127585 |
+| Rifkin  |           4.189486 |
++---------+--------------------+
+5 rows in set (0.00 sec)
+
+mysql>
